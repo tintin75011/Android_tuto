@@ -1,7 +1,9 @@
 package com.example.first_exercice.Controller;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -21,13 +23,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private Button mButtonAnswer2;
     private Button mButtonAnswer3;
     private Button mButtonAnswer4;
+    private int mScore;
 
+    private int mRemainingQuestionCount;
+    private Question mCurrentQuestion;
     private final QuestionBank mQuestionBank = GenerateQuestionBank();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+
+
         mTextQuestion = findViewById(R.id.game_activity_textview_question);
         mButtonAnswer1 = findViewById(R.id.game_activity_button_1);
         mButtonAnswer2 = findViewById(R.id.game_activity_button_2);
@@ -39,6 +47,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mButtonAnswer3.setOnClickListener(this);
         mButtonAnswer4.setOnClickListener(this);
 
+        mScore = 0;
+        mRemainingQuestionCount = 3;
+        mCurrentQuestion = mQuestionBank.getCurrentQuestion();
         displayQuestion(mQuestionBank.getCurrentQuestion());
     }
     private QuestionBank GenerateQuestionBank() {
@@ -81,8 +92,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private void displayQuestion(final Question question) {
 // Set the text for the question text view and the four buttons
         List<String> questionList;
-        mTextQuestion.setText(question.getmQuestion());
+
         questionList = question.getmChoiceList();
+        mTextQuestion.setText(question.getmQuestion());
         mButtonAnswer1.setText(questionList.get(0));
         mButtonAnswer2.setText(questionList.get(1));
         mButtonAnswer3.setText(questionList.get(2));
@@ -107,9 +119,48 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }
         if(index == mQuestionBank.getCurrentQuestion().getmAnswerIndex()){
             Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
+            mScore++;
         }else {
             Toast.makeText(this, "Incorrect!", Toast.LENGTH_SHORT).show();
         }
 
+        mRemainingQuestionCount--;
+
+        if (mRemainingQuestionCount > 0) {
+            mCurrentQuestion = mQuestionBank.getNextQuestion();
+            displayQuestion(mCurrentQuestion);
+        } else {
+            // No question left, end the game
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+            builder.setTitle("Well done!")
+                    .setMessage("Your score is " + mScore)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    })
+                    .create()
+                    .show();
+
+        }
+
+    }
+
+    public int getmRemainingQuestionCount() {
+        return mRemainingQuestionCount;
+    }
+
+    public void setmRemainingQuestionCount(int mRemainingQuestionCount) {
+        this.mRemainingQuestionCount = mRemainingQuestionCount;
+    }
+
+    public int getmScore() {
+        return mScore;
+    }
+
+    public void setmScore(int mScore) {
+        this.mScore = mScore;
     }
 }
