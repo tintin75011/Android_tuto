@@ -20,15 +20,18 @@ public class MainActivity extends AppCompatActivity {
     private TextView mGreetingTextView;
     private EditText mNameEditText;
     private Button mPlayButton;
+    private int score;
     private static final int GAME_ACTIVITY_REQUEST_CODE = 42;
     private static final String SHARED_PREF_USER_INFO = "SHARED_PREF_USER_INFO"; // data that represent the saving_file's name
     private static final String SHARED_PREF_USER_INFO_NAME = "SHARED_PREF_USER_INFO_NAME"; // key to save the Name of the user
+    private static final String SHARED_PREF_USER_INFO_SCORE = "SHARED_PREF_USER_INFO_SCORE"; // key to save the score of the user
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == GAME_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK){
-            int score = data.getIntExtra(GameActivity.BUNDLE_EXTRA_SCORE,0);
+           score = data.getIntExtra(GameActivity.BUNDLE_EXTRA_SCORE,0);
         }
+
     }
 
     @Override
@@ -41,6 +44,14 @@ public class MainActivity extends AppCompatActivity {
         mPlayButton.setEnabled(false);
 
         String firstName = getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE).getString(SHARED_PREF_USER_INFO_NAME, null);
+        String lastScore = getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE).getString(SHARED_PREF_USER_INFO_SCORE, null);
+
+        if(lastScore != null){
+            mGreetingTextView.setText("welcome back"+firstName +" your last score is :"+lastScore+"will you do better this time??");
+            mNameEditText.setText(firstName);
+            mPlayButton.setEnabled(true);
+        }
+
         mNameEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -62,9 +73,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent gameActivityIntent = new Intent(MainActivity.this, GameActivity.class);
                 startActivityForResult(gameActivityIntent, GAME_ACTIVITY_REQUEST_CODE);
+                // updating printing
+
+
+                // saving to XML file
                 SharedPreferences preferences = getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE);
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString(SHARED_PREF_USER_INFO_NAME, mNameEditText.getText().toString());
+                editor.putString(SHARED_PREF_USER_INFO_SCORE, String.valueOf(score));
                 editor.apply();
 
             }
