@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -32,7 +34,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
     public static final String BUNDLE_EXTRA_SCORE = "BUNDLE_EXTRA_SCORE"; // key used to identify the indent to return teh score
 
+    private boolean mEnableTouchEvent;
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return mEnableTouchEvent && super.dispatchTouchEvent(ev);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +62,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mRemainingQuestionCount = 3;
         mCurrentQuestion = mQuestionBank.getCurrentQuestion();
         displayQuestion(mQuestionBank.getCurrentQuestion());
+
+        mEnableTouchEvent = true;
     }
     private QuestionBank GenerateQuestionBank() {
         Question question1 = new Question(
@@ -109,6 +118,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         int index;
+        mEnableTouchEvent = false;
 
         if (view == mButtonAnswer1) {
             index = 0;
@@ -127,34 +137,45 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }else {
             Toast.makeText(this, "Incorrect!", Toast.LENGTH_SHORT).show();
         }
+        mEnableTouchEvent = false;
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mRemainingQuestionCount--;
 
-        mRemainingQuestionCount--;
+                if (mRemainingQuestionCount > 0) {
+                    mCurrentQuestion = mQuestionBank.getNextQuestion();
+                    displayQuestion(mCurrentQuestion);
+                } else {
+                    endGame();
+                }
+                mEnableTouchEvent = true;
 
-        if (mRemainingQuestionCount > 0) {
-            mCurrentQuestion = mQuestionBank.getNextQuestion();
-            displayQuestion(mCurrentQuestion);
-        } else {
-            // No question left, end the game
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-            builder.setTitle("Well done!")
-                    .setMessage("Your score is " + mScore)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent intent = new Intent();
-                            intent.putExtra(BUNDLE_EXTRA_SCORE, mScore);
-                            setResult(RESULT_OK, intent);
-                            finish();
-                        }
-                    })
-                    .create()
-                    .show();
+            }
+        },2000);
 
-        }
 
     }
 
+    private void endGame(){
+        // No question left, end the game
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Well done!")
+                .setMessage("Your score is " + mScore)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent();
+                        intent.putExtra(BUNDLE_EXTRA_SCORE, mScore);
+                        setResult(RESULT_OK, intent);
+                        finish();
+                    }
+                })
+                .create()
+                .show();
+    }
     public int getmRemainingQuestionCount() {
         return mRemainingQuestionCount;
     }
