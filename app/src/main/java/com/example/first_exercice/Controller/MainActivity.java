@@ -21,9 +21,6 @@ public class MainActivity extends AppCompatActivity {
     private EditText mNameEditText;
     private Button mPlayButton;
     private int score;
-    private String firstName;
-    private String lastScore;
-
     private static final int GAME_ACTIVITY_REQUEST_CODE = 42;
     private static final String SHARED_PREF_USER_INFO = "SHARED_PREF_USER_INFO"; // data that represent the saving_file's name
     private static final String SHARED_PREF_USER_INFO_NAME = "SHARED_PREF_USER_INFO_NAME"; // key to save the Name of the user
@@ -33,12 +30,6 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == GAME_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK){
            score = data.getIntExtra(GameActivity.BUNDLE_EXTRA_SCORE,0);
-           lastScore = String.valueOf(score);
-            if(lastScore != null){
-                mGreetingTextView.setText("welcome back"+firstName +" your last score is :"+lastScore+"will you do better this time??");
-                mNameEditText.setText(firstName);
-                mPlayButton.setEnabled(true);
-            }
         }
 
     }
@@ -52,8 +43,8 @@ public class MainActivity extends AppCompatActivity {
         mPlayButton = findViewById(R.id.main_ButtonValidate);
         mPlayButton.setEnabled(false);
 
-        firstName = getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE).getString(SHARED_PREF_USER_INFO_NAME, null);
-        lastScore = getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE).getString(SHARED_PREF_USER_INFO_SCORE, null);
+        String firstName = getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE).getString(SHARED_PREF_USER_INFO_NAME, null);
+        String lastScore = getSharedPreferences(SHARED_PREF_USER_INFO, MODE_PRIVATE).getString(SHARED_PREF_USER_INFO_SCORE, null);
 
         if(lastScore != null){
             mGreetingTextView.setText("welcome back"+firstName +" your last score is :"+lastScore+"will you do better this time??");
